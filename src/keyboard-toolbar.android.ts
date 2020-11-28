@@ -1,12 +1,22 @@
-import { android as AndroidApp } from "tns-core-modules/application";
-import { screen } from "tns-core-modules/platform";
-import { View } from "tns-core-modules/ui/core/view";
-import { AnimationCurve } from "tns-core-modules/ui/enums";
-import { Page } from "tns-core-modules/ui/page";
-import { TabView } from "tns-core-modules/ui/tab-view";
-import { ad } from "tns-core-modules/utils/utils";
+import { 
+  Application, 
+  Screen,
+  View,
+  Enums,
+  Page,
+  TabView,
+  Utils,
+  Frame
+} from "@nativescript/core";
+
+//import { screen } from "tns-core-modules/platform";
+//import { View } from "tns-core-modules/ui/core/view";
+//import { AnimationCurve } from "tns-core-modules/ui/enums";
+//import { Page } from "tns-core-modules/ui/page";
+//import { TabView } from "tns-core-modules/ui/tab-view";
+//import { ad } from "tns-core-modules/utils/utils";
 import { ToolbarBase } from "./keyboard-toolbar.common";
-import { topmost } from "tns-core-modules/ui/frame";
+//import { topmost } from "tns-core-modules/ui/frame";
 
 export class Toolbar extends ToolbarBase {
   private startPositionY: number;
@@ -34,19 +44,21 @@ export class Toolbar extends ToolbarBase {
         forView.on("focus", () => {
           this.hasFocus = true;
           if (that.lastKeyboardHeight) {
+            //this.showToolbar(<View>this.content.parent);
             this.showToolbar(<View>this.content.parent);
           }
         });
 
         forView.on("blur", () => {
           this.hasFocus = false;
+          //this.hideToolbar(<View>this.content.parent);
           this.hideToolbar(<View>this.content.parent);
         });
       };
 
       let pg;
-      if (topmost()) {
-        pg = topmost().currentPage;
+      if (Frame.topmost()) {
+        pg = Frame.topmost().currentPage;
       } else {
         pg = this.content.parent;
         while (pg && !(pg instanceof Page)) {
@@ -92,7 +104,7 @@ export class Toolbar extends ToolbarBase {
         const rect = new android.graphics.Rect();
         that.content.android.getWindowVisibleDisplayFrame(rect);
 
-        const newKeyboardHeight = (Toolbar.getUsableScreenSizeY() - rect.bottom) / screen.mainScreen.scale;
+        const newKeyboardHeight = (Toolbar.getUsableScreenSizeY() - rect.bottom) / Screen.mainScreen.scale;
         if (newKeyboardHeight <= 0 && that.lastKeyboardHeight === undefined) {
           return;
         }
@@ -141,11 +153,11 @@ export class Toolbar extends ToolbarBase {
       }
     }
 
-    const animateToY = this.startPositionY - this.lastKeyboardHeight - (this.showWhenKeyboardHidden === true ? 0 : (this.lastHeight / screen.mainScreen.scale)) - navbarHeight;
+    const animateToY = this.startPositionY - this.lastKeyboardHeight - (this.showWhenKeyboardHidden === true ? 0 : (this.lastHeight / Screen.mainScreen.scale)) - navbarHeight;
 
     parent.animate({
       translate: {x: 0, y: animateToY},
-      curve: AnimationCurve.cubicBezier(.32, .49, .56, 1),
+      curve: Enums.AnimationCurve.cubicBezier(.32, .49, .56, 1),
       duration: 370
     }).then(() => {
     });
@@ -156,7 +168,7 @@ export class Toolbar extends ToolbarBase {
     // console.log("hideToolbar, animateToY: " + animateToY);
     parent.animate({
       translate: {x: 0, y: animateToY},
-      curve: AnimationCurve.cubicBezier(.32, .49, .56, 1), // perhaps make this one a little different as it's the same as the 'show' animation
+      curve: Enums.AnimationCurve.cubicBezier(.32, .49, .56, 1), // perhaps make this one a little different as it's the same as the 'show' animation
       duration: 370
     }).then(() => {
     });
@@ -167,6 +179,7 @@ export class Toolbar extends ToolbarBase {
       return;
     }
 
+    //const parent = <View>this.content.parent;
     const parent = <View>this.content.parent;
 
     // at this point, topmost().currentPage is null, so do it like this:
@@ -186,7 +199,7 @@ export class Toolbar extends ToolbarBase {
     this.navbarHeight = Toolbar.getNavbarHeight();
     this.isNavbarVisible = !!this.navbarHeight;
 
-    this.startPositionY = screen.mainScreen.heightDIPs - y - ((this.showWhenKeyboardHidden === true ? newHeight : 0) / screen.mainScreen.scale) - (this.isNavbarVisible ? this.navbarHeight : 0);
+    this.startPositionY = Screen.mainScreen.heightDIPs - y - ((this.showWhenKeyboardHidden === true ? newHeight : 0) / Screen.mainScreen.scale) - (this.isNavbarVisible ? this.navbarHeight : 0);
 
     if (this.lastHeight === undefined) {
       // this moves the keyboardview to the bottom (just move it offscreen/toggle visibility(?) if the user doesn't want to show it without the keyboard being up)
@@ -205,7 +218,7 @@ export class Toolbar extends ToolbarBase {
 
   private static getNavbarHeight() {
     // detect correct height from: https://shiv19.com/how-to-get-android-navbar-height-nativescript-vanilla/
-    const context = (<android.content.Context>ad.getApplicationContext());
+    const context = (<android.content.Context>Utils.ad.getApplicationContext());
     let navBarHeight = 0;
     let windowManager = context.getSystemService(android.content.Context.WINDOW_SERVICE);
     let d = windowManager.getDefaultDisplay();
@@ -233,16 +246,16 @@ export class Toolbar extends ToolbarBase {
   }
 
   private static getNavbarHeightWhenKeyboardOpen() {
-    const resources = (<android.content.Context>ad.getApplicationContext()).getResources();
+    const resources = (<android.content.Context>Utils.ad.getApplicationContext()).getResources();
     const resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
     if (resourceId > 0) {
-      return resources.getDimensionPixelSize(resourceId) / screen.mainScreen.scale;
+      return resources.getDimensionPixelSize(resourceId) / Screen.mainScreen.scale;
     }
     return 0;
   }
 
   private static hasPermanentMenuKey() {
-    return android.view.ViewConfiguration.get(<android.content.Context>ad.getApplicationContext()).hasPermanentMenuKey();
+    return android.view.ViewConfiguration.get(<android.content.Context>Utils.ad.getApplicationContext()).hasPermanentMenuKey();
   }
 
   private static isVirtualNavbarHidden_butShowsWhenKeyboardIsOpen(): boolean {
@@ -252,7 +265,7 @@ export class Toolbar extends ToolbarBase {
     const SAMSUNG_NAVIGATION_EVENT = "navigationbar_hide_bar_enabled";
     try {
       // eventId is 1 in case the virtual navbar is hidden (but it shows when the keyboard opens)
-      Toolbar.supportVirtualKeyboardCheck = android.provider.Settings.Global.getInt(AndroidApp.foregroundActivity.getContentResolver(), SAMSUNG_NAVIGATION_EVENT) === 1;
+      Toolbar.supportVirtualKeyboardCheck = android.provider.Settings.Global.getInt(Application.android.foregroundActivity.getContentResolver(), SAMSUNG_NAVIGATION_EVENT) === 1;
     } catch (e) {
       // non-Samsung devices throw a 'SettingNotFoundException'
       console.log(">> e: " + e);
@@ -263,7 +276,7 @@ export class Toolbar extends ToolbarBase {
 
   private static getUsableScreenSizeY(): number {
     const screenSize = new android.graphics.Point();
-    AndroidApp.foregroundActivity.getWindowManager().getDefaultDisplay().getSize(screenSize);
+    Application.android.foregroundActivity.getWindowManager().getDefaultDisplay().getSize(screenSize);
     return screenSize.y;
   }
 }
