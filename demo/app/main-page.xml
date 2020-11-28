@@ -1,4 +1,4 @@
-<Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded" class="page" xmlns:kt="nativescript-keyboard-toolbar">
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded" class="page" xmlns:kt="@cdev38399/nativescript-keyboard-toolbar">
 
     <!-- This GridLayout wrapper is required; it wraps your layout and the Toolbar layouts-->
     <GridLayout>
